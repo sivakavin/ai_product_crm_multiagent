@@ -1,0 +1,17 @@
+langgraph
+langchain
+langchain-ollama
+langchain-openai
+python-dotenv
+faiss-cpu
+rank-bm25
+flashrank
+fastapi
+uvicorn
+langsmith
+ragas
+litellm
+pydantic
+pydantic_settings
+pymupdf
+docx2txt
