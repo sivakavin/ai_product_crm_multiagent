@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     app_env: str = Field(default="local", alias="APP_ENV")
     llm_provider: str = Field(default="ollama", alias="LLM_PROVIDER")
     db_path: str = Field(default="data/crm.db", alias="DB_PATH")
+    reranker_model_name:str = Field(default="ms-marco-MultiBERT-L-12", alias="RERANKER_MODEL_NAME")
     
     docs_path:str = Field(default="data/docs", alias="DOCS_PATH")
     
