@@ -1,9 +1,12 @@
 from litellm import completion
 from config import settings
+from utils.logger import get_logger
 import litellm
 # litellm._turn_on_debug()
 ## MODEL Switching
 #To calling llm model and switching model
+
+log = get_logger(__name__)
 
 if settings.langchain_tracing_v2 == "true":
     litellm.success_callback = ["langsmith"]
@@ -26,7 +29,7 @@ def call_llm(prompt:str,tier:str="router")->str:
     """ Call llm with automatic fallback"""
     model = get_llm(tier)
     try:
-        print(f"🔵 Calling {tier}: {model}")
+        log.info("Calling %s tier -> %s", tier, model)
 
         response = litellm.completion(
             model=model,
@@ -39,17 +42,18 @@ def call_llm(prompt:str,tier:str="router")->str:
             temperature=0
         )
         content = response.choices[0].message.content
-        # print("RAW RESPONSE:", repr(response))
-        # print("PARSED ROUTE:", repr(content))
         return content
         
-    except Exception as e:
-        # Fallback to stronger model
-        print(f"❌ LLM failed with model: {model}")
-        print(f"❌ Error: {e}")
+    except Exception:
+        # Primary model failed — fall back to a stronger/simpler model.
+        fallback_model = get_llm("fallback")
+        log.warning("Model %s failed; falling back to %s", model, fallback_model)
+        log.exception("LLM call error")
         response = litellm.completion(
-            model = get_llm("fallback"),
-            messages = [{"role":"user","content":prompt}],
+            model=fallback_model,
+            messages=[{"role": "user", "content": prompt}],
             temperature=0
         )
-        return response.choices[0].message.content
+        content = response.choices[0].message.content
+        log.info("Fallback model %s succeeded", fallback_model)
+        return content

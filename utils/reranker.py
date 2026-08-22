@@ -1,6 +1,8 @@
 from flashrank import Ranker,RerankRequest
 from config import settings
+from utils.logger import get_logger
 
+log = get_logger(__name__)
 
 ranker = Ranker(model_name=settings.reranker_model_name.strip())
 
@@ -15,9 +17,9 @@ def rerank(query:str,docs:list,top_k:int=None)->list:
         query=query,
         passages= passages,
     )
-    print(rerank_request,"START")
+    log.debug("Reranking %d passage(s) for query: %s", len(passages), query)
     results = ranker.rerank(request=rerank_request)
-    print("END")
+    log.debug("Reranking complete")
     #Map scores back to original docs
     ranked_docs = []
     for result in results[:top_k]:

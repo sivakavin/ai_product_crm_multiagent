@@ -2,3 +2,4 @@
 data/crm.db
 __pycache__/
 venv/
+logs/

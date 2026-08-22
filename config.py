@@ -82,6 +82,14 @@ class Settings(BaseSettings):
     # Cache
     cache_enabled: bool = False
 
+    # Logging
+    log_level: str = Field(default="INFO", alias="LOG_LEVEL")
+    log_dir: str = Field(default="logs", alias="LOG_DIR")
+    log_retention_days: int = Field(default=7, alias="LOG_RETENTION_DAYS")
+    log_file_name: str = Field(default="crm", alias="LOG_FILE_NAME")
+    log_to_console: bool = Field(default=True, alias="LOG_TO_CONSOLE")
+    log_color: bool = Field(default=True, alias="LOG_COLOR")
+
 
 settings = Settings()
 

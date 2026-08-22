@@ -9,6 +9,9 @@ from config import settings
 ##Adding BM25 Retriver
 from langchain_community.retrievers import BM25Retriever
 from langchain_classic.retrievers import EnsembleRetriever
+from utils.logger import get_logger
+
+log = get_logger(__name__)
 
 _chunks_cache = None
 _retriever_cache = None
@@ -27,18 +30,16 @@ def load_all_docs():
         ("*.docx",Docx2txtLoader)
     ]
 
-    print("=" * 50)
-    print("DOCS PATH:", os.path.abspath(settings.docs_path))
-    print("=" * 50)
+    log.info("Loading docs from %s", os.path.abspath(settings.docs_path))
 
     for glob,loader_cls in loaders:
         loader = DirectoryLoader(settings.docs_path,glob=glob,loader_cls=loader_cls)
         loaded_docs = loader.load()
-        print(f"\n{glob} -> {len(loaded_docs)} files")
+        log.info("%s -> %d file(s)", glob, len(loaded_docs))
         for doc in loaded_docs:
-            print("   ", doc.metadata.get("source"))
+            log.debug("   source: %s", doc.metadata.get("source"))
         docs.extend(loaded_docs)
-    print(f" Loaded {len(docs)} documents")
+    log.info("Loaded %d document(s)", len(docs))
     return docs
 
 def get_chunks():
@@ -62,7 +63,7 @@ def build_vectorstore():
     chunks = get_chunks()
     vs = FAISS.from_documents(chunks,get_embeddings())
     vs.save_local(settings.vector_path)
-    print(f"Build FAISS with {len(chunks)} chunks")
+    log.info("Built FAISS with %d chunks", len(chunks))
 
 def load_retriver():
     global _retriever_cache
