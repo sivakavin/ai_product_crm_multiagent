@@ -4,18 +4,11 @@ from utils.reranker import rerank
 from utils.prompt_loader import build_prompt
 from utils.vectorstore import load_retriver
 from utils.logger import get_logger
-import asyncio
-from fastmcp import Client
+from utils.mcp_client import call_mcp_tool
 
 log = get_logger(__name__)
 
 MAX_RETRIES = 2
-RAG_SERVER = "mcp_server/rag_server.py"
-
-async def _call_mcp(question:str)->str:
-    async with Client(RAG_SERVER) as client:
-        result = await client.call_tool("search_docs",{"question":question})
-        return result[0].text
 
 def check_relevance(question:str,context:str)->bool:
     prompt = f"""Is this context relevant to the question?
@@ -25,7 +18,9 @@ def check_relevance(question:str,context:str)->bool:
     Context : {context}
     Relevant:   """
     result = call_llm(prompt,tier="router").strip().lower()
-    return "yes" in result
+    relevant = "yes" in result
+    log.debug("RAG agent: relevance check answer=%s", result)
+    return relevant
 
 def rephrase_query(question:str)->str:
     prompt =f""" Rephrase this question differently to improve search results.
@@ -33,8 +28,9 @@ def rephrase_query(question:str)->str:
     
     Original:{question}
 Rephrased :"""
-    result = call_llm(prompt,tier="router").strip().lower()
-    return call_llm(prompt,tier="router").strip()
+    rephrased = call_llm(prompt,tier="router").strip()
+    log.debug("RAG agent: rephrased query -> %s", rephrased)
+    return rephrased
     
 
 def rag_agent_node(state:AgentState)->dict:
@@ -47,7 +43,7 @@ def rag_agent_node(state:AgentState)->dict:
         # docs = base_retriver.invoke(q)
         # docs = rerank(q,docs)
         # context = "\n\n".join(doc.page_content for doc in docs)
-        context = asyncio.run(_call_mcp(q))
+        context = call_mcp_tool("rag", "search_docs", {"question": q})
 
         if check_relevance(q,context):
             log.debug("RAG agent: context relevant on attempt %d", attempt+1)

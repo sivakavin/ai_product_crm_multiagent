@@ -44,20 +44,10 @@ class Settings(BaseSettings):
     docs_path:str = Field(default="data/docs", alias="DOCS_PATH")
     
     #Tracing
-    langchain_tracing_v2: bool = Field(default=False,alias="LANGCHAIN_TRACING_V2")
-    langchain_api_key: str = Field(
-        default="",
-        alias="LANGCHAIN_API_KEY"
-    )
-    langchain_project: str = Field(
-        default="crm_multiagent",
-        alias="LANGCHAIN_PROJECT"
-    )
-    langchain_endpoint: str = Field(
-        default="https://api.smith.langchain.com",
-        alias="LANGCHAIN_ENDPOINT"
-    )
-
+    langfuse_public_key:str = Field(default=" ",alias="LANGFUSE_PUBLIC_KEY")
+    langfuse_secret_key :str = Field(default=" ",alias="LANGFUSE_SECRET_KEY")
+    langfuse_host :str = Field(default="https://us.cloud.langfuse.com",alias="LANGFUSE_BASE_URL")
+    
     # Local Ollama settings from .env
     ollama_model: str = Field(default="qwen2.5:7b", alias="OLLAMA_MODEL")
     ollama_base_url: str = Field(default="http://localhost:11434", alias="OLLAMA_BASE_URL")
@@ -90,10 +80,13 @@ class Settings(BaseSettings):
     log_to_console: bool = Field(default=True, alias="LOG_TO_CONSOLE")
     log_color: bool = Field(default=True, alias="LOG_COLOR")
 
+    # MCP servers
+    # Blank interpreter -> reuse the app's own interpreter, so servers always
+    # run with the same dependencies as the app (no separate "python" on PATH).
+    mcp_python: str = Field(default="", alias="MCP_PYTHON")
+    # Importable module paths, launched with `python -m` from the project root.
+    mcp_sql_server: str = Field(default="mcp_servers.sql_server", alias="MCP_SQL_SERVER")
+    mcp_rag_server: str = Field(default="mcp_servers.rag_server", alias="MCP_RAG_SERVER")
+
 
 settings = Settings()
-
-if settings.langchain_tracing_v2:
-    os.environ["LANGSMITH_API_KEY"] = settings.langchain_api_key
-    os.environ["LANGSMITH_PROJECT"] = settings.langchain_project
-    os.environ["LANGSMITH_ENDPOINT"] = settings.langchain_endpoint

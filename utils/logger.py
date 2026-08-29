@@ -109,8 +109,12 @@ def _configure() -> None:
     logger.addHandler(file_handler)
 
     if settings.log_to_console:
-        console = logging.StreamHandler(sys.stdout)
-        if settings.log_color and sys.stdout.isatty():
+        # Console logs go to STDERR, never stdout. stdio-based MCP servers use
+        # stdout as their JSON-RPC channel, so any log line on stdout corrupts
+        # the protocol ("Failed to parse JSONRPC message"). stderr is the
+        # conventional destination for logs and is still shown in the terminal.
+        console = logging.StreamHandler(sys.stderr)
+        if settings.log_color and sys.stderr.isatty():
             console.setFormatter(ColorFormatter(_CONSOLE_FORMAT, datefmt=_DATE_FORMAT))
         else:
             console.setFormatter(logging.Formatter(_FILE_FORMAT, datefmt=_DATE_FORMAT))

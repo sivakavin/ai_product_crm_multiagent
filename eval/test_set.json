@@ -1,0 +1,58 @@
+[
+  {
+    "question": "what is the refund policy",
+    "expected_route": "rag"
+  },
+  {
+    "question": "can customized or personalized products be refunded",
+    "expected_route": "rag"
+  },
+  {
+    "question": "how long does it take to process a refund",
+    "expected_route": "rag"
+  },
+  {
+    "question": "show all customer interactions",
+    "expected_route": "sql"
+  },
+  {
+    "question": "which customers interacted via the chat channel",
+    "expected_route": "sql"
+  },
+  {
+    "question": "list cancelled orders with their amounts",
+    "expected_route": "sql"
+  },
+  {
+    "question": "show orders that were delivered",
+    "expected_route": "sql"
+  },
+  {
+    "question": "which customer placed the most expensive order",
+    "expected_route": "sql"
+  },
+  {
+    "question": "how many complaints were logged via email",
+    "expected_route": "sql"
+  },
+  {
+    "question": "how many interactions happened in April 2024",
+    "expected_route": "sql"
+  },
+  {
+    "question": "list customers from Chennai",
+    "expected_route": "sql"
+  },
+  {
+    "question": "which channel had the most interactions",
+    "expected_route": "sql"
+  },
+  {
+    "question": "show orders placed in the first week of April 2024",
+    "expected_route": "sql"
+  },
+  {
+    "question": "how many orders are still pending",
+    "expected_route": "sql"
+  }
+]

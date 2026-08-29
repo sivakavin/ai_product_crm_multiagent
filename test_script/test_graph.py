@@ -3,8 +3,7 @@ from graph.build_graph  import graph
 query = "How much vikram spent?"
 
 queries = [
-    ("SQL","How much has Arjun Mehta spent and what order"),
-    ("RAG","What is refund policy"),
+    ("mask","Hi, my name is Siva Kavin. My email is sivakavin.test@example.com and my phone number is +91 98765 43210.")
 ]
 
 for label,q in queries:

@@ -1,0 +1,15 @@
+[project]
+name = "ai-product-crm-multiagent"
+version = "0.1.0"
+dependencies = [
+    "fastmcp>=2.14.1",
+    "mcp>=2.1.1",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*", "graph*", "nodes*","utils*"]

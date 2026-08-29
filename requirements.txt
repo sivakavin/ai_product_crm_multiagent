@@ -1,18 +1,56 @@
+# ============================================================
+# Graph / Agent orchestration (#graph)
+# ============================================================
 langgraph
 langchain
-langchain-ollama
-langchain-openai
-python-dotenv
-faiss-cpu
-rank-bm25
-flashrank
-fastapi
-uvicorn
-langsmith
-ragas
+langchain-community              # vectorstores, document_loaders, retrievers
+langchain-classic                # EnsembleRetriever
+langchain-text-splitters         # RecursiveCharacterTextSplitter
+
+# ============================================================
+# LLM tiers / embeddings (#llm)
+# ============================================================
 litellm
+langchain-ollama                 # OllamaEmbeddings / local models
+langchain-openai                 # OpenAI-compatible embeddings/models
+
+# ============================================================
+# RAG / vector search / rerank (#rag)
+# ============================================================
+faiss-cpu                        # FAISS vectorstore
+rank-bm25                        # BM25Retriever
+flashrank                        # reranker
+pymupdf                          # PDF document loader
+docx2txt                         # DOCX document loader
+
+# ============================================================
+# MCP servers / client (#mcp)
+# ============================================================
+fastmcp
+mcp[cli]
+
+# ============================================================
+# Config / settings (#config)
+# ============================================================
+python-dotenv
 pydantic
 pydantic_settings
-pymupdf
-docx2txt
-mcp[cli]
+pyyaml                           # prompt_loader (.yaml prompts)
+
+# ============================================================
+# Tracing / evaluation (#tracing)
+# ============================================================
+langsmith
+langfuse>=2.0,<3          # litellm 1.98 requires 2.x: 4.x lacks langfuse.version, 3.x dropped sdk_integration
+ragas
+
+# ============================================================
+# UI (#ui)
+# ============================================================
+streamlit
+
+# ============================================================
+# API server (#api)
+# ============================================================
+fastapi
+uvicorn

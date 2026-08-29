@@ -5,12 +5,14 @@ from fastmcp import FastMCP
 
 mcp = FastMCP("sql-server")
 
+
+
 @mcp.tool()
 def get_all_schemas() ->str:
     """ Get all the table schemas from the CRM database"""
     con = sqlite3.connect(settings.db_path)
     cur = con.cursor()
-    cur.execute("SELECT name FROM sqlite_sequence")
+    cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
     tables = [row[0] for row in cur.fetchall()]
 
     schemas = []

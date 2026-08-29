@@ -2,15 +2,24 @@ from litellm import completion
 from config import settings
 from utils.logger import get_logger
 import litellm
+import os
 # litellm._turn_on_debug()
 ## MODEL Switching
 #To calling llm model and switching model
 
 log = get_logger(__name__)
 
-if settings.langchain_tracing_v2 == "true":
-    litellm.success_callback = ["langsmith"]
-    litellm.failure_callback = ["langsmith"]
+_env_langfuse = {
+    "LANGFUSE_PUBLIC_KEY": settings.langfuse_public_key,
+    "LANGFUSE_SECRET_KEY": settings.langfuse_secret_key,
+    "LANGFUSE_HOST": settings.langfuse_host,
+}
+for _k, _v in _env_langfuse.items():
+    if _v and _v.strip():
+        os.environ.setdefault(_k, _v)
+
+litellm.success_callback = ["langfuse"]
+litellm.failure_callback = ["langfuse"]
 
 def get_llm(tier:str ="router"):
     """ Return model based on task tier."""
