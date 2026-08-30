@@ -14,6 +14,15 @@ digging through git history.
 
 ---
 
+## 2026-08-29 — Fix `eval/run_ragas_eval.py` (ragas vs langchain-community 0.4 incompatibility)
+
+`run_ragas_eval.py` crashed on import with `ModuleNotFoundError: langchain_community.chat_models.vertexai`. ragas 0.4.3 (the latest) hard-imports `ChatVertexAI` from langchain-community, which 0.4.x removed; only the legacy `llms.vertexai` remains. Downgrading the whole langchain stack (core 1.6.1 / community 0.4.2) to get the module back was too invasive, so the script now shims it before ragas imports.
+- [`eval/run_ragas_eval.py`](eval/run_ragas_eval.py) — (1) pre-import stub `langchain_community.chat_models.vertexai` with a dummy `ChatVertexAI` in `sys.modules`; (2) swapped the broken metric imports (`_faithfulness` etc. are modules, not metrics) for the ragas 0.4.x singletons `faithfulness, answer_relevancy, context_precision, context_recall`; (3) bound every metric's `.llm` to a `ChatOllama` and `answer_relevancy.embeddings` to `OllamaEmbeddings` from config, since ragas defaults to OpenAI keys.
+- **Why:** the existing script could never have run — even past the import error, the metric list and the OpenAI-only LLM/embedding defaults would fail on this Ollama-only project.
+- **Verify:** with Ollama up, a built FAISS index and flashrank model cached, run `venv\Scripts\python.exe eval\run_ragas_eval.py` from repo root; expected a `RaggedEvaluate`/score table instead of the import traceback.
+
+---
+
 ## 2026-08-29 — Fix 50% routing accuracy on the 6-item eval set
 
 After trimming `eval/test_set.json` to 3 rag + 3 sql, routing accuracy was 3/6 (50%): `how long does it take to process a refund` → got `sql`, and the two `interactions` questions (`show all customer interactions`, `which customers interacted via the chat channel`) → got `rag`. The `qwen2.5` router guessed by keywords ("how long" looked like a measurable fact; "chat/interaction" looked like conversation).

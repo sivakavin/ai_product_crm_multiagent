@@ -27,7 +27,7 @@ docx2txt                         # DOCX document loader
 # MCP servers / client (#mcp)
 # ============================================================
 fastmcp
-mcp[cli]
+mcp[cli]>=1.29.1,<2.0
 
 # ============================================================
 # Config / settings (#config)

@@ -3,7 +3,7 @@ name = "ai-product-crm-multiagent"
 version = "0.1.0"
 dependencies = [
     "fastmcp>=2.14.1",
-    "mcp>=2.1.1",
+    "mcp>=1.29.1,<2.0",
 ]
 
 [build-system]
