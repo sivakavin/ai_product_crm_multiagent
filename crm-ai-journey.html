@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How your CRM assistant finds an answer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF6EE;
+    --ink:#1F2937;
+    --navy:#1B2A4A;
+    --amber:#E2A33D;
+    --teal:#2F8F7F;
+    --coral:#E2653E;
+    --line:#D9CFBB;
+    --card:#FFFFFF;
+    --step-gap:34px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Manrope',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 20px 64px;
+  }
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    padding:52px 20px 40px;
+    text-align:left;
+    max-width:760px;
+    margin:0 auto;
+  }
+  .kicker{
+    font-family:'Manrope',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    color:var(--teal);
+    margin:0 0 14px;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:clamp(30px,7vw,44px);
+    line-height:1.08;
+    letter-spacing:-0.01em;
+    margin:0 0 16px;
+    color:var(--navy);
+  }
+  .hero p{
+    font-size:17px;
+    line-height:1.55;
+    color:#4B5566;
+    max-width:52ch;
+    margin:0 0 26px;
+  }
+  .replay-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    font-family:'Manrope',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    padding:12px 20px;
+    border-radius:100px;
+    cursor:pointer;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .replay-btn:hover{ background:#2A3D66; }
+  .replay-btn:active{ transform:scale(0.97); }
+  .replay-btn svg{ width:16px; height:16px; }
+
+  /* ---------- PIPELINE ---------- */
+  .pipeline{
+    position:relative;
+    margin:48px 0 8px;
+    padding-left:34px;
+  }
+  .spine{
+    position:absolute;
+    left:17px;
+    top:8px;
+    bottom:8px;
+    width:2px;
+    background:var(--line);
+  }
+  .spine-fill{
+    position:absolute;
+    left:0; top:0;
+    width:100%;
+    height:0%;
+    background:linear-gradient(var(--teal), var(--amber));
+    transition:height 1.1s cubic-bezier(.65,0,.35,1);
+  }
+  .step{
+    position:relative;
+    margin-bottom:var(--step-gap);
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity .5s ease, transform .5s ease;
+  }
+  .step.show{ opacity:1; transform:translateY(0); }
+  .node{
+    position:absolute;
+    left:-34px;
+    top:0;
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:var(--card);
+    border:2px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:17px;
+    transition:border-color .4s ease, background .4s ease, transform .4s ease;
+    z-index:2;
+  }
+  .step.show .node{
+    border-color:var(--teal);
+    background:#EAF5F1;
+    transform:scale(1.05);
+  }
+  .step-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 18px;
+    margin-left:14px;
+  }
+  .step-title{
+    font-weight:800;
+    font-size:16px;
+    color:var(--navy);
+    margin:0 0 4px;
+  }
+  .step-desc{
+    font-size:14.5px;
+    line-height:1.5;
+    color:#586074;
+    margin:0;
+  }
+  .step-example{
+    display:inline-block;
+    margin-top:8px;
+    font-size:13px;
+    font-style:italic;
+    color:var(--coral);
+  }
+
+  /* two experts side-by-side */
+  .experts{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-left:14px;
+  }
+  @media (max-width:480px){
+    .experts{ grid-template-columns:1fr; }
+  }
+  .expert-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+  }
+  .expert-card .tag{
+    display:inline-block;
+    font-size:11.5px;
+    font-weight:700;
+    padding:3px 9px;
+    border-radius:100px;
+    margin-bottom:8px;
+  }
+  .tag.numbers{ background:#E7EEFB; color:#2C4C9B; }
+  .tag.knowledge{ background:#EAF5F1; color:#1E6E5C; }
+  .expert-card h4{
+    margin:0 0 4px;
+    font-size:15px;
+    color:var(--navy);
+  }
+  .expert-card p{
+    margin:0;
+    font-size:13.5px;
+    line-height:1.5;
+    color:#586074;
+  }
+
+  /* ---------- BEHIND THE SCENES ---------- */
+  .scenes{
+    margin-top:56px;
+  }
+  h2{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:24px;
+    color:var(--navy);
+    margin:0 0 8px;
+  }
+  .scenes-sub{
+    font-size:14.5px;
+    color:#6B7386;
+    margin:0 0 22px;
+    max-width:48ch;
+  }
+  .support-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  @media (max-width:420px){
+    .support-grid{ grid-template-columns:1fr; }
+  }
+  .support-item{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:13px 14px;
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+  }
+  .support-item .dot{
+    width:8px; height:8px;
+    border-radius:50%;
+    background:var(--amber);
+    margin-top:6px;
+    flex-shrink:0;
+  }
+  .support-item h5{
+    margin:0 0 3px;
+    font-size:13.5px;
+    color:var(--navy);
+    font-weight:700;
+  }
+  .support-item p{
+    margin:0;
+    font-size:12.5px;
+    line-height:1.45;
+    color:#6B7386;
+  }
+
+  /* ---------- STATS ---------- */
+  .stats{
+    margin-top:44px;
+    background:var(--navy);
+    border-radius:18px;
+    padding:26px 22px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    text-align:center;
+  }
+  @media (max-width:480px){
+    .stats{ grid-template-columns:1fr 1fr; }
+  }
+  .stat-num{
+    font-family:'Fraunces',serif;
+    font-size:26px;
+    color:#fff;
+    font-weight:600;
+  }
+  .stat-label{
+    font-size:11.5px;
+    color:#B9C2D8;
+    margin-top:2px;
+    line-height:1.3;
+  }
+
+  footer{
+    text-align:center;
+    margin-top:40px;
+    font-size:12.5px;
+    color:#9AA1AF;
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <p class="kicker">Your CRM assistant, explained simply</p>
+  <h1>What happens between your question and its answer</h1>
+  <p>Every time someone asks the assistant something — "where's my order?", "what's our refund policy?" — the question quietly passes through a series of checkpoints before an answer comes back. Here's that journey, step by step.</p>
+  <button class="replay-btn" id="replayBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+    Watch it happen
+  </button>
+</header>
+
+<div class="wrap">
+
+  <div class="pipeline">
+    <div class="spine"><div class="spine-fill" id="spineFill"></div></div>
+
+    <div class="step" data-step="1">
+      <div class="node">💬</div>
+      <div class="step-card">
+        <p class="step-title">Someone asks a question</p>
+        <p class="step-desc">A customer or teammate types something into the assistant, in their own words — no special format needed.</p>
+        <span class="step-example">"What's the status of order #4521?"</span>
+      </div>
+    </div>
+
+    <div class="step" data-step="2">
+      <div class="node">🛡️</div>
+      <div class="step-card">
+        <p class="step-title">A quick safety check</p>
+        <p class="step-desc">Before anything else happens, the question is checked to make sure it's appropriate and actually answerable — filtering out anything unsafe or off-topic.</p>
+      </div>
+    </div>
+
+    <div class="step" data-step="3">
+      <div class="node">🧭</div>
+      <div class="step-card">
+        <p class="step-title">Deciding who should answer</p>
+        <p class="step-desc">The system reads the question and figures out which specialist is best suited to handle it — or if both are needed.</p>
+      </div>
+    </div>
+
+    <div class="step" data-step="4">
+      <div class="experts">
+        <div class="expert-card">
+          <span class="tag numbers">Numbers expert</span>
+          <h4>Looks things up in the database</h4>
+          <p>Order status, revenue, account history — anything that lives in structured records.</p>
+        </div>
+        <div class="expert-card">
+          <span class="tag knowledge">Knowledge expert</span>
+          <h4>Searches documents and policies</h4>
+          <p>FAQs, policy pages, guides — anything written down in company documents.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-step="5">
+      <div class="node">🧩</div>
+      <div class="step-card">
+        <p class="step-title">Combining what was found</p>
+        <p class="step-desc">If both experts contributed, their findings are merged into a single, coherent response — no duplicate or conflicting information.</p>
+      </div>
+    </div>
+
+    <div class="step" data-step="6">
+      <div class="node">✅</div>
+      <div class="step-card">
+        <p class="step-title">You get a plain-language answer</p>
+        <p class="step-desc">Delivered back in everyday language, ready to read — the whole trip usually takes a fraction of a second.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <section class="scenes">
+    <h2>Quietly working in the background</h2>
+    <p class="scenes-sub">These don't show up in the conversation, but they're what keep every answer accurate, fast, and safe.</p>
+    <div class="support-grid">
+      <div class="support-item"><span class="dot"></span><div><h5>Smart routing</h5><p>Always sends the question to the right expert, every time.</p></div></div>
+      <div class="support-item"><span class="dot"></span><div><h5>Thorough search</h5><p>Looks through documents in more than one way, so nothing relevant is missed.</p></div></div>
+      <div class="support-item"><span class="dot"></span><div><h5>Reranking</h5><p>Re-checks what was found and puts the most relevant results first.</p></div></div>
+      <div class="support-item"><span class="dot"></span><div><h5>Shared connections</h5><p>A common language that lets tools and experts pass information to each other.</p></div></div>
+      <div class="support-item"><span class="dot"></span><div><h5>Guardrails</h5><p>Keeps the assistant from answering unsafe, unrelated, or inappropriate requests.</p></div></div>
+      <div class="support-item"><span class="dot"></span><div><h5>Activity logging</h5><p>Keeps a record of what happened, so issues can be traced and fixed quickly.</p></div></div>
+      <div class="support-item"><span class="dot"></span><div><h5>Regular testing</h5><p>Answers are checked against known-good examples to catch mistakes early.</p></div></div>
+      <div class="support-item"><span class="dot"></span><div><h5>Memory cache</h5><p>Remembers recent answers so repeat questions come back almost instantly.</p></div></div>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div><div class="stat-num">100%</div><div class="stat-label">Routed to the right expert</div></div>
+    <div><div class="stat-num">3</div><div class="stat-label">Specialists working together</div></div>
+    <div><div class="stat-num">7</div><div class="stat-label">Checkpoints per question</div></div>
+    <div><div class="stat-num">0.1s</div><div class="stat-label">To answer from memory</div></div>
+  </div>
+
+  <footer>Tap "Watch it happen" to replay the journey.</footer>
+</div>
+
+<script>
+  const steps = document.querySelectorAll('.step');
+  const spineFill = document.getElementById('spineFill');
+  const replayBtn = document.getElementById('replayBtn');
+  let playing = false;
+
+  function playAnimation(){
+    if(playing) return;
+    playing = true;
+    steps.forEach(s => s.classList.remove('show'));
+    spineFill.style.height = '0%';
+
+    steps.forEach((step, i) => {
+      setTimeout(() => {
+        step.classList.add('show');
+        const pct = Math.round(((i+1) / steps.length) * 100);
+        spineFill.style.height = pct + '%';
+        if(i === steps.length - 1) playing = false;
+      }, i * 450 + 150);
+    });
+  }
+
+  replayBtn.addEventListener('click', playAnimation);
+
+  // Auto-play once the pipeline scrolls into view
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        playAnimation();
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.25 });
+  observer.observe(document.querySelector('.pipeline'));
+</script>
+
+</body>
+</html>
