@@ -1,6 +1,5 @@
 import faiss  # eager main-thread load: faiss.dll must not be imported inside a
               # fastmcp worker thread on Windows (loader-lock deadlock)
-
 from fastmcp import FastMCP
 from utils.vectorstore import load_retriver
 from utils.reranker import rerank
